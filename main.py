@@ -1,5 +1,6 @@
 import requests
 import json
+from os import system
 
 
 def getstate():
@@ -19,13 +20,13 @@ def getstate():
 
 
 def checkstate(state):
-    validstates = ['Andhra Pradesh','Arunachal Pradesh','Assam','Bihar','Chhattisgarh','Goa','Gujarat','Haryana','Himachal Pradesh','Jammu and Kashmir','Jharkhand','Karnataka','Kerala','Madhya Pradesh','Maharashtra','Manipur','Meghalaya','Mizoram','Nagaland','Orissa','Punjab','Rajasthan','Sikkim','Tamil Nadu','Tripura','Uttarakhand','Uttar Pradesh','West Bengal','Andaman and Nicobar Islands','Chandigarh','Dadar and Nagar Haveli','Daman and Diu','Delhi','Lakshadeep','Pondicherry']
+    validstates = ['Andhra Pradesh','Telangana','Arunachal Pradesh','Assam','Bihar','Chhattisgarh','Goa','Gujarat','Haryana','Himachal Pradesh','Jammu and Kashmir','Jharkhand','Karnataka','Kerala','Madhya Pradesh','Maharashtra','Manipur','Meghalaya','Mizoram','Nagaland','Orissa','Punjab','Rajasthan','Sikkim','Tamil Nadu','Tripura','Uttarakhand','Uttar Pradesh','West Bengal','Andaman and Nicobar Islands','Chandigarh','Dadar and Nagar Haveli','Daman and Diu','Delhi','Lakshadeep','Pondicherry']
     if state in validstates:
         return True
     else:
         return False
 
-#optimization to use binary search to be done later..
+#optimization to use binary search to be done later.
 def binsearch(state,commodity,low,high):
     mid  = (high+low)//2
     r = requests.get('https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070?api-key=579b464db66ec23bdd000001cdd3946e44ce4aad7209ff7b23ac571b&format=json&offset='+str(mid)+'&limit=10')
@@ -47,14 +48,19 @@ def commcheck(entry,commodities):
     return False
 
 def linsearch(state,commodities,low,high,results):
+    sf = False
     for i in range(low,high+1,10):
-        print('iteration :',i//10)
+        print('Iteration :',i//10)
         r = requests.get('https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070?api-key=579b464db66ec23bdd000001cdd3946e44ce4aad7209ff7b23ac571b&format=json&offset=' + str(i)+'&limit=10')
         data = json.loads(r.text)
         #print(data['records'])
         records = data['records']
+
         for entry in records:
-            if entry['state']==state and commcheck(entry,commodities):
+            if sf and entry['state']!=state:
+                return results
+            elif entry['state']==state and commcheck(entry,commodities):
+                sf  = True
                 results.append(entry)
                 print(entry)
     return results
@@ -75,6 +81,7 @@ def tracker(state,commodities):
     #    binsearch(state,commodity,low,high)
     results = []
     results = linsearch(state,commodities,low,high,results)
+    return results
 
 
 
@@ -85,12 +92,26 @@ state = getstate()
 print(state)
 
 commodities = input('Enter the commodities you wish to track seperated by a comma, press enter to continue : ').split(',')
+
 for i in range(len(commodities)):
     commodities[i] = commodities[i].strip().capitalize()
 print(commodities)
 
 #track the commodities entered.
-tracker(state,commodities)
+results = tracker(state,commodities)
+districts = []
+print('Districts found :')
+for entry in results:
+    if entry['district'] not in districts:
+        districts.append(entry['district'])
+        print(entry['district'])
 
+userdistrict = input('Enter the district to which you belong or want to track : ')
+userdistrict = userdistrict.capitalize()
 
+for commodity in commodities:
+    file = open(state+'_'+userdistrict+'_'+commodity+'.txt',"a")
+    for entry in results:
+        if ((entry['district'] == userdistrict) and (commodity in entry['commodity'])):
+            file.write(entry['market']+'\t'+entry['commodity']+'\t'+entry['variety']+'\t'+entry['arrival_date']+'\t'+str(entry['min_price'])+'\t'+str(entry['max_price'])+'\t'+str(entry['modal_price']))
 
