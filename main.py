@@ -1,6 +1,6 @@
 import requests
 import json
-from os import system
+import sys
 
 
 def getstate():
@@ -84,10 +84,32 @@ def tracker(state,commodities):
     return results
 
 
+def filehead(state,userdistrict,commodity):
+    file = open(state + '_' + userdistrict + '_' + commodity + '.txt', "r")
+    header = file.readline()
+    print(header)
+    title = ['Market','Commodity','Variety','Date','min_price','max_price','modal_price']
+    file.close()
+    if header!=title:
+        file = open(state + '_' + userdistrict + '_' + commodity + '.txt', "r")
+        prevdata = file.readlines()
+        print('prevdata :',prevdata)
+        file.close()
+        file = open(state + '_' + userdistrict + '_' + commodity + '.txt', "w")
+        file.write('\t'.join(title)+'\n')
+        file.writelines(prevdata)
+        file.close()
+        return
+    else:
+        return
+
 
 
 
 #Get the name of the state as well as the commodity they want to track.
+
+
+
 state = getstate()
 print(state)
 
@@ -99,6 +121,9 @@ print(commodities)
 
 #track the commodities entered.
 results = tracker(state,commodities)
+if results == []:
+    print('No records found for the parameters given,try again later')
+    sys.exit(0)
 districts = []
 print('Districts found :')
 for entry in results:
@@ -110,6 +135,7 @@ userdistrict = input('Enter the district to which you belong or want to track : 
 userdistrict = userdistrict.capitalize()
 
 for commodity in commodities:
+    filehead(state,userdistrict,commodity)
     file = open(state+'_'+userdistrict+'_'+commodity+'.txt',"a")
     for entry in results:
         if ((entry['district'] == userdistrict) and (commodity in entry['commodity'])):
