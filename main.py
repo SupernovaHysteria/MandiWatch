@@ -75,11 +75,12 @@ def tracker(state,commodities):
     #for key in data:
     #    print(key,':',data[key])
     high = data['total'] - 10
-    print(high)
+    print('Number of records found :',high)
     low  = 0
     #for commodity in commodities :
     #    binsearch(state,commodity,low,high)
     results = []
+    print('Searching the records')
     results = linsearch(state,commodities,low,high,results)
     return results
 
@@ -113,7 +114,9 @@ def filehead(state,userdistrict,commodity):
 state = getstate()
 print(state)
 
-commodities = input('Enter the commodities you wish to track seperated by a comma, press enter to continue : ').split(',')
+
+commodities = ['rice','wheat','maize','tomato','paddy']
+#commodities = input('Enter the commodities you wish to track seperated by a comma, press enter to continue : ').split(',')
 
 for i in range(len(commodities)):
     commodities[i] = commodities[i].strip().capitalize()
