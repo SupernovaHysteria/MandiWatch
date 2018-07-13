@@ -1,6 +1,7 @@
 import requests
 import json
 import sys
+import os.path
 
 
 def getstate():
@@ -107,9 +108,8 @@ def filehead(state,userdistrict,commodity):
 
 
 
+
 #Get the name of the state as well as the commodity they want to track.
-
-
 
 state = getstate()
 print(state)
@@ -138,9 +138,16 @@ userdistrict = input('Enter the district to which you belong or want to track : 
 userdistrict = userdistrict.capitalize()
 
 for commodity in commodities:
-    filehead(state,userdistrict,commodity)
-    file = open(state+'_'+userdistrict+'_'+commodity+'.txt',"a")
+    title = [15 * ' ' + 'Market' + 15 * ' ', 10 * ' ' + 'Commodity' + 10 * ' ', 7 * ' ' + 'Variety' + 7 * ' ',10 * ' ' + 'Date' + 10 * ' ', 3*' '+'min_price'+3*' ',3*' '+'max_price'+3*' ',3*' '+'modal_price']
+    if not (os.path.isfile(state+'_'+userdistrict+'_'+commodity+'.csv')):
+        title = [15 * ' ' + 'Market' + 15 * ' ', 10 * ' ' + 'Commodity' + 10 * ' ', 7 * ' ' + 'Variety' + 7 * ' ',10 * ' ' + 'Date' + 10 * ' ', 3 * ' ' + 'min_price' + 3 * ' ', 3 * ' ' + 'max_price' + 3 * ' ',3 * ' ' + 'modal_price']
+        file = open(state+'_'+userdistrict+'_'+commodity+'.csv','w')
+        file.write('|'.join(title)+'\n')
+        file.close()
+    file = open(state+'_'+userdistrict+'_'+commodity+'.csv','a')
     for entry in results:
         if ((entry['district'] == userdistrict) and (commodity in entry['commodity'])):
-            file.write(entry['market']+'\t'+entry['commodity']+'\t'+entry['variety']+'\t'+entry['arrival_date']+'\t'+str(entry['min_price'])+'\t'+str(entry['max_price'])+'\t'+str(entry['modal_price']))
+            file.write(entry['market']+(len(title[0])-len(str(entry['market'])))*' '+'|'+entry['commodity']+(len(title[1])-len(str(entry['commodity'])))*' '+'|'+entry['variety']+(len(title[2])-len(str(entry['variety'])))*' '+'|'+entry['arrival_date']+(len(title[3])-len(str(entry['arrival_date'])))*' '+'|'+str(entry['min_price'])+(len(title[4])-len(str(entry['min_price'])))*' '+'|'+str(entry['max_price'])+(len(title[5])-len(str(entry['max_price'])))*' '+'|'+str(entry['modal_price'])+'\n')
+    file.close()
+
 

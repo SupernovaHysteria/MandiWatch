@@ -19,3 +19,5 @@ if header != head:
     file.write('\t'.join(head)+'\n')
     file.writelines(tempdata)
     file.close()
+
+print(4*'=')
