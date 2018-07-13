@@ -48,7 +48,7 @@ def commcheck(entry,commodities):
             return True
     return False
 
-def linsearch(state,commodities,low,high,results):
+def linsearchfront(state,commodities,low,high,results):
     sf = False
     for i in range(low,high+1,10):
         print('Iteration :',i//10)
@@ -59,11 +59,34 @@ def linsearch(state,commodities,low,high,results):
 
         for entry in records:
             if sf and entry['state']!=state:
+                print('Search complete\n\n')
                 return results
             elif entry['state']==state and commcheck(entry,commodities):
                 sf  = True
                 results.append(entry)
-                print(entry)
+                print('HIT'.center(100,'-'))
+    return results
+
+
+
+
+def linsearchback(state,commodities,low,high,results):
+    sf = False
+    for i in range(high,low+1,-10):
+        print('Iteration :',(high-i)//10)
+        r = requests.get('https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070?api-key=579b464db66ec23bdd000001cdd3946e44ce4aad7209ff7b23ac571b&format=json&offset=' + str(i)+'&limit=10')
+        data = json.loads(r.text)
+        #print(data['records'])
+        records = data['records']
+
+        for entry in records[::-1]:
+            if sf and entry['state']!=state:
+                print('Search complete\n\n')
+                return results
+            elif entry['state']==state and commcheck(entry,commodities):
+                sf  = True
+                results.append(entry)
+                print('HIT'.center(100,'-'))
     return results
 
 
@@ -82,28 +105,11 @@ def tracker(state,commodities):
     #    binsearch(state,commodity,low,high)
     results = []
     print('Searching the records')
-    results = linsearch(state,commodities,low,high,results)
-    return results
-
-
-def filehead(state,userdistrict,commodity):
-    file = open(state + '_' + userdistrict + '_' + commodity + '.txt', "r")
-    header = file.readline()
-    print(header)
-    title = ['Market','Commodity','Variety','Date','min_price','max_price','modal_price']
-    file.close()
-    if header!=title:
-        file = open(state + '_' + userdistrict + '_' + commodity + '.txt', "r")
-        prevdata = file.readlines()
-        print('prevdata :',prevdata)
-        file.close()
-        file = open(state + '_' + userdistrict + '_' + commodity + '.txt', "w")
-        file.write('\t'.join(title)+'\n')
-        file.writelines(prevdata)
-        file.close()
-        return
+    if abs(ord('A')-ord(state[0]))<=abs(ord('Z')-ord(state[0])):
+        results = linsearchfront(state,commodities,low,high,results)
     else:
-        return
+        results = linsearchback(state,commodities,low,high,results)
+    return results
 
 
 
@@ -128,7 +134,7 @@ if results == []:
     print('No records found for the parameters given,try again later')
     sys.exit(0)
 districts = []
-print('Districts found :')
+print('Districts found :\n')
 for entry in results:
     if entry['district'] not in districts:
         districts.append(entry['district'])
@@ -150,4 +156,5 @@ for commodity in commodities:
             file.write(entry['market']+(len(title[0])-len(str(entry['market'])))*' '+'|'+entry['commodity']+(len(title[1])-len(str(entry['commodity'])))*' '+'|'+entry['variety']+(len(title[2])-len(str(entry['variety'])))*' '+'|'+entry['arrival_date']+(len(title[3])-len(str(entry['arrival_date'])))*' '+'|'+str(entry['min_price'])+(len(title[4])-len(str(entry['min_price'])))*' '+'|'+str(entry['max_price'])+(len(title[5])-len(str(entry['max_price'])))*' '+'|'+str(entry['modal_price'])+'\n')
     file.close()
 
+print('Data entered into files.')
 

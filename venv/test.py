@@ -21,3 +21,8 @@ if header != head:
     file.close()
 
 print(4*'=')
+print(abs(ord('A')-ord('U')))
+
+random = [1,2,3,4,5,6,7,8,9,10]
+for item in random[::-1]:
+    print(item)
