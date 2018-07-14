@@ -212,6 +212,22 @@ def plotter(state,commodities,userdistrict):
 
 
 
+def filefix(state,commodity,district):
+    file  = open(state+'_'+district+'_'+commodity+'.csv','r')
+    data = file.readlines()
+    head = data[0]
+    data = data[1:]
+    no_dup_data = []
+    for line in data:
+        if line not in no_dup_data:
+            no_dup_data.append(line)
+    file.close()
+    file = open(state+'_'+district+'_'+commodity+'.csv','w')
+    file.write(head)
+    for line in no_dup_data:
+        file.write(line)
+    file.close()
+    return
 
 
 
@@ -260,6 +276,7 @@ for commodity in commodities:
         if ((entry['district'] == userdistrict) and (commodity in entry['commodity'])):
             file.write(entry['market']+(len(title[0])-len(str(entry['market'])))*' '+'|'+entry['commodity']+(len(title[1])-len(str(entry['commodity'])))*' '+'|'+entry['variety']+(len(title[2])-len(str(entry['variety'])))*' '+'|'+entry['arrival_date']+(len(title[3])-len(str(entry['arrival_date'])))*' '+'|'+str(entry['min_price'])+(len(title[4])-len(str(entry['min_price'])))*' '+'|'+str(entry['max_price'])+(len(title[5])-len(str(entry['max_price'])))*' '+'|'+str(entry['modal_price'])+'\n')
     file.close()
+    filefix(state,commodity,userdistrict)
 
 print('Data entered into files.\n\n')
 
