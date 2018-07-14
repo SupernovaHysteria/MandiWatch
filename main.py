@@ -20,6 +20,18 @@ def getstate():
         return getstate()
 
 
+def geddit(things):
+    tmp = input()
+    tmp = tmp.capitalize()
+    if tmp in things:
+        print('Accepted')
+        return tmp
+    else:
+        print('Invalid option entered, please try again')
+        return geddit(things)
+
+
+
 def checkstate(state):
     validstates = ['Andhra Pradesh','Telangana','Arunachal Pradesh','Assam','Bihar','Chhattisgarh','Goa','Gujarat','Haryana','Himachal Pradesh','Jammu and Kashmir','Jharkhand','Karnataka','Kerala','Madhya Pradesh','Maharashtra','Manipur','Meghalaya','Mizoram','Nagaland','Orissa','Punjab','Rajasthan','Sikkim','Tamil Nadu','Tripura','Uttarakhand','Uttar Pradesh','West Bengal','Andaman and Nicobar Islands','Chandigarh','Dadar and Nagar Haveli','Daman and Diu','Delhi','Lakshadeep','Pondicherry']
     if state in validstates:
@@ -68,8 +80,6 @@ def linsearchfront(state,commodities,low,high,results):
     return results
 
 
-
-
 def linsearchback(state,commodities,low,high,results):
     sf = False
     for i in range(high,low+1,-10):
@@ -88,8 +98,6 @@ def linsearchback(state,commodities,low,high,results):
                 results.append(entry)
                 print('HIT'.center(100,'-'))
     return results
-
-
 
 
 def tracker(state,commodities):
@@ -113,6 +121,42 @@ def tracker(state,commodities):
 
 
 
+def getoption():
+    option = input('Would you like to plot the graph for a given commodity?\n'
+                   '[y/n]')
+
+    if option == 'y':
+        return True
+
+    elif option == 'n':
+        print('END'.center(100,'-'))
+        sys.exit(0)
+    else:
+        print('Invalid option entered, please try again')
+        return getoption()
+
+
+def plotter(state,commodities,userdistrict):
+    print('Enter the commodity you want to plot.')
+    for i in range(len(commodities)):
+        print(i+1, commodities[i])
+    commodity = geddit(commodities)
+    file = open(state+'_'+userdistrict+'_'+commodity+'.csv','r')
+    raw_data = file.readlines()
+    #print(raw_data)
+    rows = []
+    for line in raw_data:
+        data = (line.split('|'))
+        #print(data)
+        row = []
+        for e in data:
+            row.append(e.strip())
+        rows.append(row)
+    #print(rows)
+    del(rows[0])
+    print(rows)
+
+
 
 
 #Get the name of the state as well as the commodity they want to track.
@@ -121,7 +165,7 @@ state = getstate()
 print(state)
 
 
-commodities = ['rice','wheat','maize','tomato','paddy']
+commodities = ['rice','wheat','maize','tomato','paddy','banana']
 #commodities = input('Enter the commodities you wish to track seperated by a comma, press enter to continue : ').split(',')
 
 for i in range(len(commodities)):
@@ -140,8 +184,8 @@ for entry in results:
         districts.append(entry['district'])
         print(entry['district'])
 
-userdistrict = input('Enter the district to which you belong or want to track : ')
-userdistrict = userdistrict.capitalize()
+print('Enter the district to which you belong or want to track')
+userdistrict = geddit(districts)
 
 for commodity in commodities:
     title = [15 * ' ' + 'Market' + 15 * ' ', 10 * ' ' + 'Commodity' + 10 * ' ', 7 * ' ' + 'Variety' + 7 * ' ',10 * ' ' + 'Date' + 10 * ' ', 3*' '+'min_price'+3*' ',3*' '+'max_price'+3*' ',3*' '+'modal_price']
@@ -156,5 +200,14 @@ for commodity in commodities:
             file.write(entry['market']+(len(title[0])-len(str(entry['market'])))*' '+'|'+entry['commodity']+(len(title[1])-len(str(entry['commodity'])))*' '+'|'+entry['variety']+(len(title[2])-len(str(entry['variety'])))*' '+'|'+entry['arrival_date']+(len(title[3])-len(str(entry['arrival_date'])))*' '+'|'+str(entry['min_price'])+(len(title[4])-len(str(entry['min_price'])))*' '+'|'+str(entry['max_price'])+(len(title[5])-len(str(entry['max_price'])))*' '+'|'+str(entry['modal_price'])+'\n')
     file.close()
 
-print('Data entered into files.')
+print('Data entered into files.\n\n')
+
+option = getoption()
+
+if (option):
+    plotter(state,commodities,userdistrict)
+
+
+
+
 
