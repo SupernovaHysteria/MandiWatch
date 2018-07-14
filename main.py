@@ -2,6 +2,7 @@ import requests
 import json
 import sys
 import os.path
+import matplotlib.pyplot as plt
 
 
 def getstate():
@@ -13,7 +14,7 @@ def getstate():
         print('Accepted')
         return state
     elif state=='':
-        print('Hack')
+        print('Defaulting to')
         return 'Karnataka'
     else:
         print('The state entered is not valid, please try again')
@@ -122,8 +123,7 @@ def tracker(state,commodities):
 
 
 def getoption():
-    option = input('Would you like to plot the graph for a given commodity?\n'
-                   '[y/n]')
+    option = input()
 
     if option == 'y':
         return True
@@ -136,10 +136,21 @@ def getoption():
         return getoption()
 
 
+def get_points(market,variety,rows):
+    x=[]
+    y=[]
+    for row in rows:
+        date = row[3].split('T')
+        if row[0]==market and row[2]==variety and date[0] not in x:
+            x.append(date[0])
+            y.append(row[-1])
+    return x,y
+
+
 def plotter(state,commodities,userdistrict):
     print('Enter the commodity you want to plot.')
     for i in range(len(commodities)):
-        print(i+1, commodities[i])
+        print(i+1,'.',commodities[i])
     commodity = geddit(commodities)
     file = open(state+'_'+userdistrict+'_'+commodity+'.csv','r')
     raw_data = file.readlines()
@@ -154,7 +165,54 @@ def plotter(state,commodities,userdistrict):
         rows.append(row)
     #print(rows)
     del(rows[0])
-    print(rows)
+    #print(rows)
+    cleanrows = []
+    for row in rows:
+        if row not in cleanrows:
+            cleanrows.append(row)
+    rows = cleanrows[:]
+    del(cleanrows)
+    #print(rows)
+    markets = []
+    varieties = []
+    for row in rows:
+        if row[0] not in markets:
+            markets.append(row[0])
+        if row[2] not in varieties:
+            varieties.append(row[2])
+    #print(markets)
+    #print(varieties)
+    x = []
+    y = []
+    for market in markets:
+        for variety in varieties:
+            x,y = get_points(market,variety,rows)
+            if x==[] and y==[]:
+                continue
+            else:
+                print(x,y)
+                y = [int(ely) for ely in y]
+                plt.plot(x,y,label =market+'_'+variety+'_modal_price',marker = 'o',markerfacecolor='blue',markersize=8)
+                plt.xlabel('Date')
+                plt.ylabel('Price')
+                plt.title(commodity+' Prices in '+userdistrict)
+                plt.legend()
+                plt.ylim(min(y)-300,max(y)+300)
+
+    if not (x==[] and y==[]):
+        plt.show()
+    else:
+        print('No entries found for the commodity, please try again')
+
+    print('Would you like to plot a graph for another commodity?\n'
+                   '[y/n]')
+    option = getoption()
+    if (option):
+        plotter(state,commodities,userdistrict)
+
+
+
+
 
 
 
@@ -184,6 +242,9 @@ for entry in results:
         districts.append(entry['district'])
         print(entry['district'])
 
+
+#get the district they belong to.
+
 print('Enter the district to which you belong or want to track')
 userdistrict = geddit(districts)
 
@@ -202,11 +263,14 @@ for commodity in commodities:
 
 print('Data entered into files.\n\n')
 
+print('Would you like to plot the graph for a given commodity?\n'
+                   '[y/n]')
 option = getoption()
 
 if (option):
     plotter(state,commodities,userdistrict)
 
+print('END'.center(100,'-'))
 
 
 

@@ -44,3 +44,10 @@ print(rows)
 
 del(rows[0])
 print(rows)
+
+def scrub():
+    return [2,3,4,5],[7,9,8,0]
+
+x,y = scrub()
+
+print(x,'nub',y)
