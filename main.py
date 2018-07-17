@@ -184,6 +184,7 @@ def plotter(state,commodities,userdistrict):
     #print(varieties)
     x = []
     y = []
+    all_y = []
     for market in markets:
         for variety in varieties:
             x,y = get_points(market,variety,rows)
@@ -191,15 +192,19 @@ def plotter(state,commodities,userdistrict):
                 continue
             else:
                 print(x,y)
+                for p in y:
+                    all_y.append(int(p))
+                print(all_y)
                 y = [int(ely) for ely in y]
                 plt.plot(x,y,label =market+'_'+variety+'_modal_price',marker = 'o',markerfacecolor='blue',markersize=8)
                 plt.xlabel('Date')
                 plt.ylabel('Price')
                 plt.title(commodity+' Prices in '+userdistrict)
                 plt.legend()
-                plt.ylim(min(y)-300,max(y)+300)
+
 
     if not (x==[] and y==[]):
+        plt.ylim(min(all_y) - 300, max(all_y) + 300)
         plt.show()
     else:
         print('No entries found for the commodity, please try again')
