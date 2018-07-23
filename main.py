@@ -3,6 +3,7 @@ import json
 import sys
 import os.path
 import matplotlib.pyplot as plt
+import datetime
 
 
 def getstate():
@@ -147,6 +148,14 @@ def get_points(market,variety,rows):
     return x,y
 
 
+def sort_dates(all_x):
+   dates = [datetime.datetime.strptime(date,'%Y-%m-%d') for date in all_x]
+   dates.sort()
+   dates = [datetime.datetime.strftime(date,'%Y-%m-%d')for date in dates]
+   return dates
+
+
+
 def plotter(state,commodities,userdistrict):
     print('Enter the commodity you want to plot.')
     for i in range(len(commodities)):
@@ -182,33 +191,49 @@ def plotter(state,commodities,userdistrict):
             varieties.append(row[2])
     #print(markets)
     #print(varieties)
+    graphs = {}
     x = []
     y = []
     all_y = []
+    all_x = []
     for market in markets:
         for variety in varieties:
             x,y = get_points(market,variety,rows)
             if x==[] and y==[]:
                 continue
             else:
+                graphs[market+'_'+variety] = x,y
                 print(x,y)
                 for p in y:
                     all_y.append(int(p))
-                print(all_y)
-                y = [int(ely) for ely in y]
-                plt.plot(x,y,label =market+'_'+variety+'_modal_price',marker = 'o',markerfacecolor='blue',markersize=8)
-                plt.xlabel('Date')
-                plt.ylabel('Price')
-                plt.title(commodity+' Prices in '+userdistrict)
-                plt.legend()
+                for p in x:
+                    all_x.append(p)
+                #print(all_y)
+
+    #print(all_x)
+    dummy_x = sort_dates(all_x)
+    dummy_y = [None for el in all_x]
+    #print(dummy_y)
+    plt.plot(dummy_x,dummy_y)
+    for graph in graphs:
+        tmp_x = graphs[graph][0]
+        tmp_y = graphs[graph][1]
+        tmp_y = [int(ely) for ely in tmp_y]
+        plt.plot(tmp_x,tmp_y,label =graph+'_modal_price',marker = 'o', markerfacecolor='blue',markersize=6)
+        plt.xlabel('Date')
+        plt.ylabel('Price(Rs./100kg)')
+        plt.title(commodity + ' Prices in ' + userdistrict)
+        plt.legend()
 
 
-    if not (x==[] and y==[]):
+
+
+
+    if (all_x):
         plt.ylim(min(all_y) - 300, max(all_y) + 300)
         plt.show()
     else:
-        print('No entries found for the commodity, please try again')
-
+        print('No entries found for that commodity.Please try again.')
     print('Would you like to plot a graph for another commodity?\n'
                    '[y/n]')
     option = getoption()

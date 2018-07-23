@@ -1,3 +1,5 @@
+import numpy as np
+
 ass = ['jack','ass']
 if 'ass' in ass:
     print('yeaa')
@@ -51,3 +53,15 @@ def scrub():
 x,y = scrub()
 
 print(x,'nub',y)
+
+wew = {}
+wew['one'] = x,y
+print(wew['one'][0])
+gg = [1,34,6644,None,435,None,345,88,None]
+
+print(np.isfinite(np.array(gg).astype(float)))
+gg = [1,3,4,2]
+if (gg):
+    print("hi")
+else:
+    print('bye')
